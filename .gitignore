@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.gemini/
+.idea/
+.vscode/
+node_modules/
+dist/
+build/
+*.log

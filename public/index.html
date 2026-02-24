@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskly | Master Your Future</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #a855f7;
+            --accent: #f43f5e;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .light-mode {
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text: #1e293b;
+            --text-dim: #64748b;
+            --border: rgba(0, 0, 0, 0.05);
+            --glass: rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: var(--transition);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+            padding: 20px;
+        }
+
+        .background-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            filter: blur(120px);
+            opacity: 0.1;
+            z-index: -1;
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(-10%, -10%);
+            }
+
+            to {
+                transform: translate(10%, 10%);
+            }
+        }
+
+        /* Auth Screen */
+        #authScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+
+        #authScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-card h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .auth-card p {
+            color: var(--text-dim);
+            margin-bottom: 32px;
+        }
+
+        .auth-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .auth-input-group input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px 24px;
+            border-radius: 18px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .auth-input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+
+        /* Dashboard Screen */
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .brand h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .brand p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        /* Mission Input */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            flex: 2;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .date-wrapper {
+            flex: 1;
+        }
+
+        .date-wrapper input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        /* Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .task-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        .task-card.completed .task-name {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .task-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .task-deadline {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .custom-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 16px;
+        }
+
+        .task-card.completed .custom-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .custom-checkbox::after {
+            content: '✓';
+            color: white;
+            opacity: 0;
+        }
+
+        .task-card.completed .custom-checkbox::after {
+            opacity: 1;
+        }
+
+        .dashboard-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-item .value {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .stat-item .label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .filters {
+            background: var(--glass);
+            padding: 6px;
+            border-radius: 14px;
+            display: flex;
+            gap: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+            }
+
+            .dashboard-meta {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <div class="background-blob"></div>
+
+    <!-- Login Screen -->
+    <div id="authScreen">
+        <div class="auth-card">
+            <h2>Welcome Back</h2>
+            <p>Enter your details to sync your missions.</p>
+            <div class="auth-input-group">
+                <input type="text" id="loginName" placeholder="Your Name" autocomplete="off">
+                <input type="password" id="loginPin" placeholder="4-Digit PIN" maxlength="4" autocomplete="off">
+                <input type="text" id="loginPhone" placeholder="WhatsApp Number (e.g., +91...)" autocomplete="off">
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                    <input type="checkbox" id="sendAlertCheck" checked
+                        style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="sendAlertCheck"
+                        style="font-size: 0.9rem; color: var(--text-dim); cursor: pointer;">Enable WhatsApp
+                        Alerts</label>
+                </div>
+            </div>
+            <button class="auth-btn" id="loginBtn">ENTER DASHBOARD</button>
+            <p id="authError" style="color: var(--accent); font-size: 0.85rem; margin-top: 16px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div class="app-container" id="dashboard" style="display: none; opacity: 0; transition: opacity 0.6s ease;">
+        <header>
+            <div class="brand">
+                <h1>Taskly</h1>
+                <p>Hello, <span id="userNameDisplay">Guardian</span>. Reach your potential.</p>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" id="themeToggle" title="Toggle Appearance">☀️</button>
+                <button class="action-btn" id="logoutBtn" title="Logout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="input-section">
+            <div class="input-row">
+                <div class="input-wrapper">
+                    <input type="text" id="taskInput" placeholder="What's your next mission?" autocomplete="off">
+                </div>
+                <div class="date-wrapper">
+                    <input type="datetime-local" id="dateInput">
+                </div>
+            </div>
+            <button class="add-btn" id="addTaskBtn">CREATE TASK</button>
+        </section>
+
+        <section class="dashboard-meta">
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="value" id="totalTasks">0</span>
+                    <span class="label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="completedTasks" style="color: #10b981;">0</span>
+                    <span class="label">Reached</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="pendingTasks" style="color: #6366f1;">0</span>
+                    <span class="label">Active</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="task-list" id="taskList"></div>
+
+        <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
+            <p style="color: var(--text-dim); font-style: italic;">"No missions yet. Start your journey."</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const authScreen = document.getElementById('authScreen');
+        const loginName = document.getElementById('loginName');
+        const loginPin = document.getElementById('loginPin');
+        const loginPhone = document.getElementById('loginPhone');
+        const sendAlertCheck = document.getElementById('sendAlertCheck');
+        const loginBtn = document.getElementById('loginBtn');
+        const authError = document.getElementById('authError');
+
+        const dashboard = document.getElementById('dashboard');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const taskInput = document.getElementById('taskInput');
+        const dateInput = document.getElementById('dateInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        let currentUser = JSON.parse(localStorage.getItem('taskly_user_v2'));
+        let tasks = [];
+        let currentFilter = 'all';
+
+        // --- AUTH LOGIC ---
+
+        const login = async () => {
+            const name = loginName.value.trim();
+            const pin = loginPin.value.trim();
+            const phone = sendAlertCheck.checked ? loginPhone.value.trim() : null;
+
+            if (!name || pin.length < 4) {
+                showAuthError("Name and 4-digit PIN are required.");
+                return;
+            }
+
+            if (sendAlertCheck.checked && !phone) {
+                showAuthError("Please provide a WhatsApp number or uncheck alerts.");
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = "VERIFYING...";
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, pin, phone })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    currentUser = data;
+                    localStorage.setItem('taskly_user_v2', JSON.stringify(currentUser));
+                    showDashboard();
+                } else {
+                    showAuthError(data.error || "Login failed.");
+                }
+            } catch (err) {
+                showAuthError("Connection lost. Try again.");
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "ENTER DASHBOARD";
+            }
+        };
+
+        const showAuthError = (msg) => {
+            authError.textContent = msg;
+            authError.style.display = 'block';
+            setTimeout(() => authError.style.display = 'none', 3000);
+        };
+
+        const showDashboard = () => {
+            authScreen.classList.add('hidden');
+            userNameDisplay.textContent = currentUser.name;
+            dashboard.style.display = 'block';
+            setTimeout(() => dashboard.style.opacity = '1', 100);
+            fetchTasks();
+        };
+
+        const logout = () => {
+            localStorage.removeItem('taskly_user_v2');
+            window.location.reload();
+        };
+
+        // --- TASK LOGIC ---
+
+        const fetchTasks = async () => {
+            try {
+                const res = await fetch('/api/tasks?user_id=' + currentUser.user_id);
+                tasks = await res.json();
+                renderTasks();
+            } catch (err) { console.error(err); }
+        };
+
+        const renderTasks = () => {
+            const filteredTasks = tasks.filter(t => {
+                if (currentFilter === 'pending') return !t.completed;
+                if (currentFilter === 'completed') return t.completed;
+                return true;
+            });
+
+            taskList.innerHTML = '';
+            document.getElementById('emptyState').style.display = filteredTasks.length === 0 ? 'block' : 'none';
+
+            filteredTasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card ' + (task.completed ? 'completed' : '');
+
+                const deadline = task.deadline ? new Date(task.deadline).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : '';
+
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        <div class="custom-checkbox" onclick="toggleTask(${task.id}, ${task.completed})"></div>
+                        <div class="task-details">
+                            <span class="task-name">${task.title}</span>
+                            ${deadline ? `<span class="task-deadline">⏳ ${deadline}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="cursor: pointer; opacity: 0.5;" onclick="deleteTask(${task.id})">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
+                    </div>
+                `;
+                taskList.appendChild(card);
+            });
+            updateStats();
+        };
+
+        const updateStats = () => {
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('completedTasks').textContent = tasks.filter(t => t.completed).length;
+            document.getElementById('pendingTasks').textContent = tasks.length - tasks.filter(t => t.completed).length;
+        };
+
+        const addTask = async () => {
+            const title = taskInput.value.trim();
+            const deadline = dateInput.value;
+            if (!title) return;
+
+            addTaskBtn.disabled = true;
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, deadline, user_id: currentUser.user_id })
+                });
+                const nt = await res.json();
+                tasks.unshift(nt);
+                taskInput.value = '';
+                dateInput.value = '';
+                renderTasks();
+            } catch (err) { console.error(err); }
+            finally { addTaskBtn.disabled = false; }
+        };
+
+        const toggleTask = async (id, status) => {
+            const ns = !status;
+            if (ns) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            try {
+                const res = await fetch('/api/tasks/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed: ns, user_id: currentUser.user_id })
+                });
+                const ut = await res.json();
+                tasks = tasks.map(t => t.id === id ? ut : t);
+                renderTasks();
+            } catch (err) { console.error(err); }
+        };
+
+        const deleteTask = async (id) => {
+            try {
+                await fetch('/api/tasks/' + id + '?user_id=' + currentUser.user_id, { method: 'DELETE' });
+                tasks = tasks.filter(t => t.id !== id);
+                renderTasks();
+            } catch (err) { console.error(err); }
+        };
+
+        // --- INIT ---
+
+        loginBtn.addEventListener('click', login);
+        addTaskBtn.addEventListener('click', addTask);
+        logoutBtn.addEventListener('click', logout);
+
+        document.querySelectorAll('.filter-btn').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active');
+            currentFilter = b.dataset.filter;
+            renderTasks();
+        }));
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            document.getElementById('themeToggle').textContent = isLight ? '🌙' : '☀️';
+        });
+
+        // Toggle phone input based on checkbox
+        sendAlertCheck.addEventListener('change', () => {
+            loginPhone.style.display = sendAlertCheck.checked ? 'block' : 'none';
+        });
+
+        if (currentUser) {
+            showDashboard();
+        }
+    </script>
+</body>
+
+</html>
