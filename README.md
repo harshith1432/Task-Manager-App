@@ -18,13 +18,13 @@
 ## 📸 Project Demo
 
 ````carousel
-![Login Screen](file:///d:/projects%20softwares/100%20DAYS%20PROGRAM/Task%20Manager%20App/assets/login.png)
+![Login Screen](assets/login.png)
 Login or register instantly with a beautiful glassmorphic interface and WhatsApp alert toggle.
 <!-- slide -->
-![Dashboard](file:///d:/projects%20softwares/100%20DAYS%20PROGRAM/Task%20Manager%20App/assets/dashboard.png)
+![Dashboard](assets/dashboard.png)
 Track your missions with real-time counters, filters, and motivational glassmorphism.
 <!-- slide -->
-![WhatsApp Alerts](file:///d:/projects%20softwares/100%20DAYS%20PROGRAM/Task%20Manager%20App/assets/whatsapp.png)
+![WhatsApp Alerts](assets/whatsapp.png)
 Stay proactive with automated WhatsApp reminders for task creation and upcoming deadlines.
 ````
 
