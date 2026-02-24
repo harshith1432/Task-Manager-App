@@ -17,16 +17,17 @@
 
 ## 📸 Project Demo
 
-````carousel
+### 🔐 Secure Login
 ![Login Screen](assets/login.png)
-Login or register instantly with a beautiful glassmorphic interface and WhatsApp alert toggle.
-<!-- slide -->
+*Login or register instantly with a beautiful glassmorphic interface and WhatsApp alert toggle.*
+
+### 🚀 Mission Dashboard
 ![Dashboard](assets/dashboard.png)
-Track your missions with real-time counters, filters, and motivational glassmorphism.
-<!-- slide -->
+*Track your missions with real-time counters, filters, and motivational glassmorphism.*
+
+### 🔔 Proactive Alerts
 ![WhatsApp Alerts](assets/whatsapp.png)
-Stay proactive with automated WhatsApp reminders for task creation and upcoming deadlines.
-````
+*Stay proactive with automated WhatsApp reminders for mission creation and upcoming deadlines.*
 
 ## 🛠️ Tech Stack
 
